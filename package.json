@@ -1,0 +1,19 @@
+{
+  "name": "youtube-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodmon src/index.js"
+  },
+  "author": "Ashutosh Gaur",
+  "license": "ISC",
+  "description": "This project contains backend of website like youtube",
+  "devDependencies": {
+    "nodemon": "^3.1.11",
+    "prettier": "^3.7.4"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  }
+}
