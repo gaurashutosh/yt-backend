@@ -1,5 +1,5 @@
 const asyncHandler = (incomingFuction)=>{
-    return ()=>{
+    return (req,res)=>{
        Promise.resolve(new ApiResponse()).catch( new ApiError()) 
     }
 }
