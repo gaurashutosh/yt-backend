@@ -1,5 +1,7 @@
-const asyncHandler = (incomingFuction)=>{
-    return (req,res)=>{
-       Promise.resolve(new ApiResponse()).catch( new ApiError()) 
-    }
-}
+const asyncHandler = (incomingFuction) => {
+  return (req, res, next) => {
+    Promise.resolve(incomingFuction(req, res, next)).catch((err) => next(err));
+  };
+};
+
+export {asyncHandler}
