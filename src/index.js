@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
-import {app} from "./app.js";
-
+import { app } from "./app.js";
 import connectDB from "./db/DBconn.js";
 dotenv.config({
   path: "./.env",
@@ -12,4 +11,3 @@ connectDB().then(() => {
     console.log(`The server is listening at http://localhost:${port}`);
   });
 });
-

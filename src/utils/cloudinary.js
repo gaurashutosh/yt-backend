@@ -1,5 +1,8 @@
 import { v2 as cloudinary } from "cloudinary";
-import fs from "fs"
+import dotenv from "dotenv";
+import fs from "fs";
+
+dotenv.config();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -7,15 +10,20 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloudinary = async function (localFilePath) {
+const uploadOnCloudinary = async function (localFilePath, folderName) {
   try {
     if (!localFilePath) return console.log(`Path of the file is not provided!`);
-     const response = await cloudinary.uploader.upload(localFilePath, { resource_type: "auto" });
-     console.log(`File uploaded on cloudinary, url: ${response.url}`);
-     
-    return response
-  } catch (error) {}
-  fs.unlinkSync(localFilePath)
+
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: "auto",
+      folder: folderName,
+    });
+    console.log(`File uploaded on cloudinary, url: ${response.url}`);
+    fs.unlinkSync(localFilePath);
+    return response;
+  } catch (error) {
+    fs.unlinkSync(localFilePath);
+  }
 };
 
-export {uploadOnCloudinary}
+export { uploadOnCloudinary };
