@@ -209,4 +209,35 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+  try {
+    /**
+     * verify the user is loggedin by middleware
+     * Take old password and the new password from the user
+     * find the user in the database
+     * verify the given old pass from the database password
+     * if it is correct update the password field
+     */
+
+    const { oldPassword, newPassword } = req.body;
+
+    const user = await User.findById(req.user?._id);
+    
+    const isPasswordValid = await user.isPasswordCorrect(oldPassword);
+    console.log("isPasswordValid: ",isPasswordValid);
+    
+    if (!isPasswordValid) {
+      throw new ApiError(400, "Please Provide The Correct Old Password");
+    }
+    user.password = newPassword
+    user.save({validateBeforeSave:false})
+
+    res.status(200).json(new ApiResponse(200,{},"Password Updated Successfully"))
+  } catch (error) {
+    throw new ApiError(500, error || "Internal Server Error");
+  }
+});
+
+
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword};

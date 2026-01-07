@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/apiResponse.js";
 import { ApiError } from "../utils/apiError.js";
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
+//jwt.verify always returns id not _id
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
   try {
@@ -15,9 +16,10 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     }
 
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-
-    const user = User.findById(decodedToken?._id).select(
-      "-password , -refreshToken"
+    console.log("decodedToken----->",decodedToken);
+    
+    const user = await User.findById(decodedToken?.id).select(
+      "-password -refreshToken"
     );
 
     if (!user) {
@@ -26,6 +28,6 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    throw new ApiError(401, "Invalid Authentication!");
+    throw new ApiError(401, error?.message || "verifyJWT: Invalid Authentication!");
   }
 });
