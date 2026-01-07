@@ -3,6 +3,7 @@ import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import jwt from "jsonwebtoken";
 
 const registerUser = asyncHandler(async (req, res) => {
   const { username, fullName, email, password } = req.body;
@@ -98,7 +99,7 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 
   const isPasswordValid = await user.isPasswordCorrect(password);
-  
+
   if (!isPasswordValid) {
     throw new ApiError(401, "Invalid user credentials!");
   }
@@ -137,7 +138,8 @@ const generateRefreshAndAccessToken = async (userId) => {
   } catch (error) {
     throw new ApiError(
       500,
-      error||"Something went wrong while generating access token and refresh token!"
+      error ||
+        "Something went wrong while generating access token and refresh token!"
     );
   }
 };
@@ -163,4 +165,48 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "User Logged Out Successfully!"));
 });
 
-export { registerUser, loginUser, logoutUser };
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  try {
+    const incomingRefreshToken =
+      req.cookies.refreshToken || req.body.refreshToken;
+
+    if (!incomingRefreshToken) {
+      throw new ApiError(400, "Invalid Refresh Token!");
+    }
+
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    const user = await User.findById(decodedToken?._id);
+
+    if (!user) {
+      throw new ApiError(400, "Unauthorized Request: User Not Found!");
+    }
+    const { accessToken, refreshToken } = await generateRefreshAndAccessToken(
+      decodedToken._id
+    );
+
+    const options = {
+      HttpOnly: true,
+      secure: true,
+    };
+
+    res
+      .status(200)
+      .cookie(refreshToken, "refreshToken", options)
+      .cookie(accessToken, "accessToken", options)
+      .json(
+        new ApiResponse(
+          200,
+          { refreshToken, accessToken },
+          "Tokens Refreshed Successfully!"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(500, error?.message || "Internal Server Error");
+  }
+});
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken };
