@@ -31,10 +31,12 @@ const userSchema = new Schema(
       index: true,
     },
     avatar: {
-      type: String,
+      url: String,
+      publicId: String,
     },
     coverImage: {
-      type: String,
+      url: String,
+      publicId: String,
     },
     password: {
       type: String,
